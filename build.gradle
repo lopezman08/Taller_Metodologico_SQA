@@ -6,7 +6,6 @@ apply plugin: 'org.sonarqube'
 repositories {
     mavenLocal()
     mavenCentral()
-    jcenter()
 }
 
 buildscript {
@@ -14,8 +13,8 @@ buildscript {
         mavenLocal()
         mavenCentral()
         maven { url 'https://plugins.gradle.org/m2' }
-        jcenter()
     }
+
     dependencies {
         classpath "net.serenity-bdd:serenity-gradle-plugin:2.0.80"
         classpath "org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:4.4.1.3373"
@@ -23,21 +22,18 @@ buildscript {
 }
 
 dependencies {
-    // --- Serenity + Cucumber (JUnit4) ---
-    implementation "net.serenity-bdd:serenity-junit:3.6.0"                // JUnit 4
+    implementation "net.serenity-bdd:serenity-junit:3.6.0"
     implementation "net.serenity-bdd:serenity-core:3.6.0"
     implementation "net.serenity-bdd:serenity-screenplay:3.6.0"
     implementation "net.serenity-bdd:serenity-screenplay-webdriver:3.6.0"
-    implementation "net.serenity-bdd:serenity-cucumber:3.6.0"             // Runner JUnit4
+    implementation "net.serenity-bdd:serenity-cucumber:3.6.0"
 
-    // Utilidades
     implementation "org.slf4j:slf4j-simple:1.7.7"
     implementation "com.google.guava:guava:23.0"
     implementation "org.apache.poi:poi:3.17"
     implementation "org.apache.poi:poi-ooxml:3.17"
 
-    // Tests
-    testImplementation "junit:junit:4.13.1"                               // JUnit 4
+    testImplementation "junit:junit:4.13.1"
     testImplementation "io.github.bonigarcia:webdrivermanager:5.8.0"
 }
 
@@ -57,7 +53,7 @@ jacoco {
 }
 
 test {
-    useJUnit()                // Runner JUnit4
+    useJUnit()
     ignoreFailures = true
     finalizedBy jacocoTestReport
 }
@@ -75,16 +71,15 @@ jacocoTestReport {
         html.required = true
         csv.required = false
     }
-    finalizedBy 'aggregate'    // genera reportes Serenity después de Jacoco
+    finalizedBy 'aggregate'
 }
 
-// --- SonarQube/SonarCloud ---
 sonarqube {
     properties {
-        // Cambia según tu caso:
-        property "sonar.host.url", "https://sonarcloud.io"   // o "http://localhost:9000"
-        property "sonar.organization", "<tu_organizacion>"   // SonarCloud
-        property "sonar.projectKey",   "<tu_project_key>"
+
+        property "sonar.host.url", "https://sonarcloud.io"
+        property "sonar.organization", "lopezman08"
+        property "sonar.projectKey",   "lopezman08_reto-tecnico-sqa"
         property "sonar.projectName",  "Reto Tecnico SQA"
 
         property "sonar.sourceEncoding", "UTF-8"
@@ -92,10 +87,15 @@ sonarqube {
         property "sonar.tests",   "test/java"
 
         property "sonar.junit.reportPaths", "build/test-results/test"
-        property "sonar.java.coveragePlugin", "jacoco"
-        property "sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/jacocoTestReport.xml"
+
+        property "sonar.coverage.jacoco.xmlReportPaths",
+                "build/reports/jacoco/test/jacocoTestReport.xml"
 
         property "sonar.exclusions",      "**/build/**, **/.gradle/**, **/resources/**"
         property "sonar.test.exclusions", "**/resources/**"
     }
+}
+
+tasks.named("sonarqube") {
+    dependsOn("test", "jacocoTestReport")
 }
