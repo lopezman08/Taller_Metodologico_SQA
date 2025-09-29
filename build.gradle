@@ -79,7 +79,7 @@ sonarqube {
 
         property "sonar.host.url", "https://sonarcloud.io"
         property "sonar.organization", "lopezman08"
-        property "sonar.projectKey",   "lopezman08_reto-tecnico-sqa"
+        property "sonar.projectKey",   "lopezman08"
         property "sonar.projectName",  "Reto Tecnico SQA"
 
         property "sonar.sourceEncoding", "UTF-8"
