@@ -1,0 +1,19 @@
+# Gradle
+.gradle/
+build/
+out/
+!gradle/wrapper/gradle-wrapper.jar
+
+# IntelliJ / IDE
+.idea/
+*.iml
+
+# Serenity / reports
+target/
+**/reports/**
+**/serenity/**
+
+# Otros
+*.log
+.DS_Store
+Thumbs.db
