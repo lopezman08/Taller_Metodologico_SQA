@@ -99,3 +99,10 @@ sonarqube {
 tasks.named("sonarqube") {
     dependsOn("test", "jacocoTestReport")
 }
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
