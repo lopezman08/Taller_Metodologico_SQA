@@ -2,7 +2,7 @@ package co.sqasa.tasks;
 
 import co.sqasa.interactions.EntrarAlFrameDelCalendarioInteraction;
 import co.sqasa.interactions.IntentarClickEnFechaFueraDeRangoInteraction;
-import co.sqasa.userInterfaces.PaginaDatepickerUI;
+import co.sqasa.userinterfaces.PaginaDatepickerUI;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Task;
 import net.serenitybdd.screenplay.actions.Click;
@@ -25,7 +25,7 @@ public class IntentarSeleccionarFechasFueraDeRangoTask implements Task {
     public <T extends Actor> void performAs(T actor) {
         actor.attemptsTo(
                 EntrarAlFrameDelCalendarioInteraction.now(),
-                Click.on(PaginaDatepickerUI.BTN_DATE),
+                Click.on(PaginaDatepickerUI.CAMPO_FECHA),
                 IntentarClickEnFechaFueraDeRangoInteraction.desde(token)
         );
     }

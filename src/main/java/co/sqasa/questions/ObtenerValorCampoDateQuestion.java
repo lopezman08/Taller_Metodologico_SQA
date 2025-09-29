@@ -1,6 +1,6 @@
 package co.sqasa.questions;
 
-import co.sqasa.userInterfaces.PaginaDatepickerUI;
+import co.sqasa.userinterfaces.PaginaDatepickerUI;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Question;
 
@@ -11,6 +11,6 @@ public class ObtenerValorCampoDateQuestion implements Question<String> {
     }
     @Override
     public String answeredBy(Actor actor) {
-        return PaginaDatepickerUI.BTN_DATE.resolveFor(actor).getValue();
+        return PaginaDatepickerUI.CAMPO_FECHA.resolveFor(actor).getValue();
     }
 }

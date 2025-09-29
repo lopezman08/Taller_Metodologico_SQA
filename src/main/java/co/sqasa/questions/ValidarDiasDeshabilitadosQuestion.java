@@ -1,6 +1,6 @@
 package co.sqasa.questions;
 
-import co.sqasa.userInterfaces.PaginaDatepickerUI;
+import co.sqasa.userinterfaces.PaginaDatepickerUI;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Question;
 
@@ -12,6 +12,6 @@ public class ValidarDiasDeshabilitadosQuestion implements Question<Boolean> {
 
     @Override
     public Boolean answeredBy(Actor actor) {
-        return !PaginaDatepickerUI.DIAS_DESHABILITADOS.resolveAllFor(actor).isEmpty();
+        return !PaginaDatepickerUI.DIA_DESHABILITADA.resolveAllFor(actor).isEmpty();
     }
 }

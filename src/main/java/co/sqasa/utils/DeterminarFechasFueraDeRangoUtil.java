@@ -1,12 +1,13 @@
 package co.sqasa.utils;
 
 import java.time.LocalDate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class DeterminarFechasFueraDeRangoUtil {
 
-     public static LocalDate TraerFechaLimite(String expr) {
+    private DeterminarFechasFueraDeRangoUtil() {
+    }
+
+    public static LocalDate traerFechaLimite(String expr) {
         LocalDate fechaBase= LocalDate.now();
         if (expr == null) return fechaBase;
 

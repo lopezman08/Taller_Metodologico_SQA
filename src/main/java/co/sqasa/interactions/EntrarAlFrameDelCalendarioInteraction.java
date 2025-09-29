@@ -1,6 +1,6 @@
 package co.sqasa.interactions;
 
-import co.sqasa.userInterfaces.PaginaDatepickerUI;
+import co.sqasa.userinterfaces.PaginaDatepickerUI;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Interaction;
 import net.serenitybdd.screenplay.abilities.BrowseTheWeb;

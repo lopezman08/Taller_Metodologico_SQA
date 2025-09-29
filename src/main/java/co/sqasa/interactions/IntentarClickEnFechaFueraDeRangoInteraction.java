@@ -1,14 +1,16 @@
 package co.sqasa.interactions;
 
-import co.sqasa.userInterfaces.PaginaDatepickerUI;
+import co.sqasa.userinterfaces.PaginaDatepickerUI;
 import co.sqasa.utils.DeterminarFechasFueraDeRangoUtil;
+import net.serenitybdd.core.pages.WebElementFacade;
 import net.serenitybdd.screenplay.Actor;
 import net.serenitybdd.screenplay.Interaction;
 import net.serenitybdd.screenplay.abilities.BrowseTheWeb;
-import org.openqa.selenium.*;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.WebDriver;
+
 import java.time.LocalDate;
 import java.time.Month;
-import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
@@ -17,10 +19,8 @@ import static net.serenitybdd.screenplay.Tasks.instrumented;
 
 public class IntentarClickEnFechaFueraDeRangoInteraction implements Interaction {
 
-    /** Resultado del intento de clic en el calendario. */
     public enum ResultadoClick { HABILITADO_CLICKEADO, DESHABILITADO_BLOQUEADO }
 
-    /** Token con la expresión de fecha, p.ej. "D-21" o "M+1,D+10". */
     private final String tokenFecha;
 
     public static IntentarClickEnFechaFueraDeRangoInteraction desde(String tokenFecha) {
@@ -33,99 +33,81 @@ public class IntentarClickEnFechaFueraDeRangoInteraction implements Interaction 
 
     @Override
     public <T extends Actor> void performAs(T actor) {
-        WebDriver driver = BrowseTheWeb.as(actor).getDriver();
-
-        // 1) Calcular fecha objetivo y guardar contexto mínimo
-        LocalDate fechaObjetivo = DeterminarFechasFueraDeRangoUtil.TraerFechaLimite(tokenFecha);
+        LocalDate fechaObjetivo = DeterminarFechasFueraDeRangoUtil.traerFechaLimite(tokenFecha);
         actor.remember("fechaObjetivo", fechaObjetivo);
 
-        String valorInicial = PaginaDatepickerUI.BTN_DATE.resolveFor(actor).getValue();
+        String valorInicial = PaginaDatepickerUI.CAMPO_FECHA.resolveFor(actor).getValue();
         actor.remember("initialDateStr", valorInicial == null ? "" : valorInicial);
 
-        // 2) Navegar hasta que en el encabezado del datepicker aparezcan el mes/año de la fecha objetivo
-        navegarHastaMesYAnio(driver, fechaObjetivo.getMonthValue(), fechaObjetivo.getYear());
+        navegarHastaMesYAnio(actor, fechaObjetivo.getMonthValue(), fechaObjetivo.getYear());
 
-        // 3) Intentar el clic sobre el día (habilitado o deshabilitado)
-        int diaObjetivo = fechaObjetivo.getDayOfMonth();
+        String dia = String.valueOf(fechaObjetivo.getDayOfMonth());
 
-        // Días deshabilitados: <td class="ui-state-disabled"><span class="ui-state-default">DIA</span></td>
-        By diaDeshabilitado = By.xpath(
-                "//table[contains(@class,'ui-datepicker-calendar')]//td[contains(@class,'ui-state-disabled')]" +
-                        "[.//span[@class='ui-state-default' and normalize-space()='" + diaObjetivo + "']]"
-        );
+        List<WebElementFacade> diasDeshab =
+                PaginaDatepickerUI.DIA_DESHABILITADA.of(dia).resolveAllFor(actor);
 
-        // Días habilitados: <td><a>DIA</a></td>
-        By diaHabilitado = By.xpath(
-                "//table[contains(@class,'ui-datepicker-calendar')]//td[not(contains(@class,'ui-state-disabled'))]" +
-                        "//a[normalize-space()='" + diaObjetivo + "']"
-        );
-
-        List<WebElement> deshabilitados = driver.findElements(diaDeshabilitado);
-        if (!deshabilitados.isEmpty()) {
-            WebElement celda = deshabilitados.get(0);
+        if (!diasDeshab.isEmpty()) {
+            WebElementFacade span = diasDeshab.get(0);
             try {
-                celda.findElement(By.cssSelector("span.ui-state-default")).click();
+                span.click();
             } catch (Exception e) {
-                ((JavascriptExecutor) driver).executeScript("arguments[0].click();", celda);
+                WebDriver drv = BrowseTheWeb.as(actor).getDriver();
+                ((JavascriptExecutor) drv).executeScript("arguments[0].click();", span);
             }
             actor.remember("clickOutcome", ResultadoClick.DESHABILITADO_BLOQUEADO);
             return;
         }
 
-        List<WebElement> habilitados = driver.findElements(diaHabilitado);
-        if (!habilitados.isEmpty()) {
-            habilitados.get(0).click(); // Esto sí escribe en el input
+        List<WebElementFacade> diasHab =
+                PaginaDatepickerUI.DIA_HABILITADA.of(dia).resolveAllFor(actor);
+
+        if (!diasHab.isEmpty()) {
+            diasHab.get(0).click();
             actor.remember("clickOutcome", ResultadoClick.HABILITADO_CLICKEADO);
             return;
         }
 
         throw new IllegalStateException(
-                "No se encontró el día " + diaObjetivo +
-                        " en el mes visible tras navegar. Revisa selectores o la navegación."
+                "No se encontró el día " + dia + " en el mes visible tras navegar. Revisa selectores o la navegación."
         );
     }
 
-    /** Navega con los botones «prev/next» hasta que coincidan [mes, año] del encabezado. */
-    private void navegarHastaMesYAnio(WebDriver driver, int mesObjetivo, int anioObjetivo) {
-        By lblMes  = By.cssSelector(".ui-datepicker-month");
-        By lblAnio = By.cssSelector(".ui-datepicker-year");
-        By btnPrev = By.cssSelector(".ui-datepicker-prev");
-        By btnNext = By.cssSelector(".ui-datepicker-next");
-
+    private void navegarHastaMesYAnio(Actor actor, int mesObjetivo, int anioObjetivo) {
         int intentos = 0;
-        while (intentos++ < 24) { // tope de 2 años para evitar bucles infinitos
-            String textoMes = driver.findElement(lblMes).getText().trim();    // «octubre» / «October»
+        while (intentos++ < 3) {
+            String textoMes = PaginaDatepickerUI.ETIQUETA_MES.resolveFor(actor).getText().trim();
             int mesActual   = numeroDeMes(textoMes);
-            int anioActual  = Integer.parseInt(driver.findElement(lblAnio).getText().trim());
+            int anioActual  = Integer.parseInt(PaginaDatepickerUI.ETIQUETA_ANIO.resolveFor(actor).getText().trim());
 
             if (mesActual == mesObjetivo && anioActual == anioObjetivo) return;
 
             boolean irAAnterior = (anioActual > anioObjetivo) ||
                     (anioActual == anioObjetivo && mesActual > mesObjetivo);
-            driver.findElement(irAAnterior ? btnPrev : btnNext).click();
+
+            if (irAAnterior) {
+                PaginaDatepickerUI.BTN_PREV.resolveFor(actor).click();
+            } else {
+                PaginaDatepickerUI.BTN_NEXT.resolveFor(actor).click();
+            }
         }
         throw new IllegalStateException("No fue posible llegar a " + mesObjetivo + "/" + anioObjetivo + " con prev/next.");
     }
 
-    /** Convierte el nombre del mes (ES/EN, largo o corto) a número 1..12 sin usar switch. */
     private int numeroDeMes(String nombreMes) {
         String normalizado = nombreMes.toLowerCase(Locale.ROOT);
 
-        // Nombres completos
         for (int m = 1; m <= 12; m++) {
             Month month = Month.of(m);
             String en = month.getDisplayName(TextStyle.FULL,  Locale.ENGLISH).toLowerCase(Locale.ROOT);
             String es = month.getDisplayName(TextStyle.FULL,  new Locale("es")).toLowerCase(Locale.ROOT);
             if (normalizado.equals(en) || normalizado.equals(es)) return m;
         }
-        // Abreviaturas
         for (int m = 1; m <= 12; m++) {
             Month month = Month.of(m);
             String en = month.getDisplayName(TextStyle.SHORT, Locale.ENGLISH).toLowerCase(Locale.ROOT);
             String es = month.getDisplayName(TextStyle.SHORT, new Locale("es")).toLowerCase(Locale.ROOT);
             if (normalizado.equals(en) || normalizado.equals(es)) return m;
         }
-        // Fallback: devolver mes actual si no se reconoce (evita NPE pero deja pista en logs si quisieras)
         return LocalDate.now().getMonthValue();
     }
 }
