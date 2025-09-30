@@ -96,8 +96,39 @@ sonarqube {
     }
 }
 
-tasks.named("sonarqube") {
+tasks.named("sonar") {
     dependsOn("test", "jacocoTestReport")
+}
+
+ext {
+    sonarOrg     = findProperty("sonar.organization") ?: "lopezman08-1"
+    sonarProject = findProperty("sonar.projectKey")   ?: "lopezman08_Taller_Metodologico_SQA"
+}
+
+tasks.register("sonarExport", Exec) {
+    workingDir project.projectDir
+    if (System.getProperty("os.name").toLowerCase().contains("win")) {
+        commandLine "powershell", "-NoProfile", "-ExecutionPolicy", "Bypass",
+                "-File", "scripts/sonar-export.ps1",
+                "-OrgKey", sonarOrg,
+                "-ProjectKey", sonarProject
+    } else {
+        commandLine "pwsh", "-NoProfile", "-ExecutionPolicy", "Bypass",
+                "-File", "scripts/sonar-export.ps1",
+                "-OrgKey", sonarOrg,
+                "-ProjectKey", sonarProject
+    }
+
+    environment "SONAR_TOKEN", System.getenv("SONAR_TOKEN") ?: (findProperty("sonar.token") ?: "")
+    doFirst {
+        if (!environment["SONAR_TOKEN"]) {
+            throw new GradleException("Falta SONAR_TOKEN (define env var SONAR_TOKEN o -Dsonar.token=...)")
+        }
+    }
+}
+
+tasks.named("sonar").configure {
+    finalizedBy tasks.named("sonarExport")
 }
 
 java {
