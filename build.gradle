@@ -22,19 +22,19 @@ buildscript {
 }
 
 dependencies {
-    implementation "net.serenity-bdd:serenity-junit:3.6.0"
-    implementation "net.serenity-bdd:serenity-core:3.6.0"
-    implementation "net.serenity-bdd:serenity-screenplay:3.6.0"
-    implementation "net.serenity-bdd:serenity-screenplay-webdriver:3.6.0"
-    implementation "net.serenity-bdd:serenity-cucumber:3.6.0"
+    implementation "net.serenity-bdd:serenity-junit:4.1.20"
+    implementation "net.serenity-bdd:serenity-core:4.1.20"
+    implementation "net.serenity-bdd:serenity-screenplay:4.1.20"
+    implementation "net.serenity-bdd:serenity-screenplay-webdriver:4.1.20"
+    implementation "net.serenity-bdd:serenity-cucumber:4.1.20"
 
-    implementation "org.slf4j:slf4j-simple:1.7.7"
+    implementation "org.slf4j:slf4j-simple:2.0.13"
     implementation "com.google.guava:guava:23.0"
     implementation "org.apache.poi:poi:3.17"
     implementation "org.apache.poi:poi-ooxml:3.17"
 
     testImplementation "junit:junit:4.13.1"
-    testImplementation "io.github.bonigarcia:webdrivermanager:5.8.0"
+    testImplementation "io.github.bonigarcia:webdrivermanager:5.9.2"
 }
 
 sourceSets {
